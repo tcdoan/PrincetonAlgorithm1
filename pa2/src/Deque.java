@@ -29,7 +29,8 @@ public class Deque<Item> implements Iterable<Item>
     public Deque()
     {
         n = 0;
-        first = last = null;
+        first = null;
+        last = null;
     }
 
     // is the deque empty?
@@ -105,6 +106,10 @@ public class Deque<Item> implements Iterable<Item>
         }
         Item item = first.item;
         first = first.next;
+        if (first != null)
+        {
+            first.prev = null;
+        }
         n--;
         if (isEmpty())
         {
@@ -123,7 +128,10 @@ public class Deque<Item> implements Iterable<Item>
         }
         Item item = last.item;
         last = last.prev;
-        last.next = null;
+        if (last != null)
+        {
+            last.next = null;
+        }
         n--;
         if (isEmpty())
         {
@@ -216,7 +224,7 @@ public class Deque<Item> implements Iterable<Item>
         for (int x: deck)
         {
             System.out.printf("%2d ", x);
-            assert (x ==k);
+            assert (x == k);
             k++;
         }
         System.out.println();
@@ -235,7 +243,7 @@ public class Deque<Item> implements Iterable<Item>
         for (int x: deck)
         {
             System.out.printf("%2d ", x);
-            assert (x ==k);
+            assert (x == k);
             k++;
         }
         System.out.println();
