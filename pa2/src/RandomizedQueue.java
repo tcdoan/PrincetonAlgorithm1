@@ -53,7 +53,7 @@ public class RandomizedQueue<Item> implements Iterable<Item>
         }
 
         // double size of array if necessary
-        if (n == items.length)
+        if (last == items.length)
         {
             resize(2*items.length);
         }
@@ -68,8 +68,7 @@ public class RandomizedQueue<Item> implements Iterable<Item>
     private void resize(int newSize)
     {
         assert newSize >= n;
-        @SuppressWarnings("unchecked")
-        Item copy[] = (Item[]) new Object[newSize];
+        Item[] copy = (Item[]) new Object[newSize];
 
         int j = 0;
         for (int i = 0; i < last; i++)
@@ -90,9 +89,9 @@ public class RandomizedQueue<Item> implements Iterable<Item>
     public Item dequeue()
     {
         if (isEmpty()) throw new NoSuchElementException("Queue underflow");
-        if (n == items.length/4)
+        if (size() == items.length/4)
         {
-            resize(2*items.length);
+            resize(items.length/2);
         }
         int randIdx = StdRandom.uniform(0, last);
         Item item = null;
@@ -134,7 +133,6 @@ public class RandomizedQueue<Item> implements Iterable<Item>
     {
         private int current;
 
-        @SuppressWarnings("unchecked")
         private Item[] copies = (Item[]) new Object[n];
 
         public QueueIterator()

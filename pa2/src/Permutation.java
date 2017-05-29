@@ -22,7 +22,7 @@ public class Permutation
             queue.enqueue(item);
         }
 
-        for (int i= 0; i < k; i++)
+        for (int i = 0; i < k; i++)
         {
             StdOut.println(queue.dequeue());
         }
