@@ -3,13 +3,17 @@ import edu.princeton.cs.algs4.LinkedQueue;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
+/*
+    TODO:
+    1. Remove tests for exact floating-point equality.
+ */
 public class FastCollinearPoints
 {
-    private LineSegment[] segments;
-    private int numberOfSegments;
+    private ArrayList<LineSegment> segments;
 
     // finds all line segments containing 4 or more pointsv
     public FastCollinearPoints(Point[] points)
@@ -24,74 +28,84 @@ public class FastCollinearPoints
             if (p == null) throw new java.lang.NullPointerException("a point is null");
         }
 
-        for (int i  = 1; i < points.length; i++)
-        {
-            if (points[i].compareTo(points[i-1]) == 0)
-            {
-                throw  new java.lang.IllegalArgumentException("constructor contains a repeated point");
-            }
-        }
-
-        if (points.length < 4)
-        {
-            numberOfSegments = 0;
-            segments = new LineSegment[0];
-            return;
-        }
-
-
-        Arrays.sort(points);
-
         Point[] aux = new Point[points.length];
         for (int i = 0; i < points.length; i++)
         {
             aux[i] = points[i];
         }
+        Arrays.sort(aux);
+        for (int i  = 1; i < aux.length; i++)
+        {
+            if (aux[i].compareTo(aux[i-1]) == 0)
+            {
+                throw  new java.lang.IllegalArgumentException("constructor contains a repeated point");
+            }
+        }
 
-        LinkedQueue<LineSegment> queue = new LinkedQueue<>();
+        segments = new ArrayList<>();
+        if (points.length < 4)
+        {
+            return;
+        }
+
         for (int i = 0; i < points.length; i++)
         {
             Point p = points[i];
             Comparator<Point> c = p.slopeOrder();
+
+            Arrays.sort(aux);
             Arrays.sort(aux, c);
+
             for (int j = 1; j < aux.length-2; j++)
             {
                 if (p.slopeTo(aux[j]) == p.slopeTo(aux[j+1]) && p.slopeTo(aux[j]) == p.slopeTo(aux[j+2]))
                 {
+                    ArrayList<Point> points4LineSegment = new ArrayList<>();
+                    points4LineSegment.add(p);
+                    points4LineSegment.add(aux[j]);
+                    points4LineSegment.add(aux[j+1]);
+                    points4LineSegment.add(aux[j+2]);
                     double slope = p.slopeTo(aux[j]);
-                    int k = j+2;
+                    int k = j+3;
                     while (k < aux.length && p.slopeTo(aux[k]) == slope)
                     {
+                        points4LineSegment.add(aux[k]);
                         k++;
                     }
-                    LineSegment segment = new LineSegment(p, aux[k-1]);
-                    queue.enqueue(segment);
+                    if (isSorted(points4LineSegment))
+                    {
+                        LineSegment segment = new LineSegment(p, aux[k-1]);
+                        segments.add(segment);
+                    }
                     j = k;
                 }
             }
         }
 
-        numberOfSegments = queue.size();
-        segments = new LineSegment[numberOfSegments];
-        int i = 0;
-        for (LineSegment segment: queue)
-        {
-            segments[i++] = segment;
-        }
-
     }
 
+    private boolean isSorted(ArrayList<Point> points4LineSegment)
+    {
+        for (int i  = 0; i < points4LineSegment.size()-1; i++)
+        {
+            if (points4LineSegment.get(i).compareTo(points4LineSegment.get(i+1)) > 0)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
     // the number of line segments
     public int numberOfSegments()
     {
-        return numberOfSegments;
+        return segments.size();
     }
 
     // the line segments
     public LineSegment[] segments()
     {
-        return segments;
+        return segments.toArray(new LineSegment[segments.size()]);
     }
 
     public static void main(String[] args)
@@ -125,5 +139,4 @@ public class FastCollinearPoints
         }
         StdDraw.show();
     }
-
 }

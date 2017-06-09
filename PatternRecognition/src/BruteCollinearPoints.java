@@ -3,12 +3,18 @@ import edu.princeton.cs.algs4.LinkedQueue;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
 
+/*
+    TODO:
+    1. Remove tests for exact floating-point equality.
+ */
 public class BruteCollinearPoints
 {
-    private LineSegment[] segments;
-    private int numberOfSegments;
+    private ArrayList<LineSegment> segments;
 
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points)
@@ -17,57 +23,61 @@ public class BruteCollinearPoints
         {
             throw new NullPointerException("argument is null");
         }
+        segments = new ArrayList<>();
         if (points.length < 4)
         {
-            numberOfSegments = 0;
-            segments = new LineSegment[0];
             return;
         }
 
-        Arrays.sort(points);
-        LinkedQueue<LineSegment> queue = new LinkedQueue<>();
-        for (int x1 = 0; x1 < points.length-3; x1++)
+        Point[] copies = new  Point[points.length];
+        // Check for dups and copy points to copies array
+        Set<Point> pointSet = new TreeSet<>();
+        for (int i = 0; i < points.length; i++)
         {
-            for (int x2 = x1+1; x2 < points.length-2; x2++)
+            copies[i] = points[i];
+            if (pointSet.contains(points[i]))
             {
-                for (int x3= x2+1; x3 < points.length-1; x3++)
+                throw new IllegalArgumentException();
+            }
+            pointSet.add(points[i]);
+        }
+        pointSet.clear();
+
+        Arrays.sort(copies);
+        for (int x1 = 0; x1 < copies.length-3; x1++)
+        {
+            for (int x2 = x1+1; x2 < copies.length-2; x2++)
+            {
+                for (int x3= x2+1; x3 < copies.length-1; x3++)
                 {
-                    double pq = points[x1].slopeTo(points[x2]);
-                    double pr = points[x1].slopeTo(points[x3]);
+                    double pq = copies[x1].slopeTo(copies[x2]);
+                    double pr = copies[x1].slopeTo(copies[x3]);
                     if (pq == pr)
                     {
-                        for (int x4 = x3 + 1; x4 < points.length; x4++)
+                        for (int x4 = x3 + 1; x4 < copies.length; x4++)
                         {
-                            double ps = points[x1].slopeTo(points[x4]);
+                            double ps = copies[x1].slopeTo(copies[x4]);
                             if (pq == ps)
                             {
-                                numberOfSegments += 1;
-                                LineSegment segment = new LineSegment(points[x1], points[x4]);
-                                queue.enqueue(segment);
+                                LineSegment segment = new LineSegment(copies[x1], copies[x4]);
+                                segments.add(segment);
                             }
                         }
                     }
                 }
             }
         }
-        segments = new LineSegment[queue.size()];
-        int i = 0;
-        for (LineSegment segment: queue)
-        {
-            segments[i++] = segment;
-        }
     }
 
     // the number of line segments
     public int numberOfSegments()
     {
-        return numberOfSegments;
+        return segments.size();
     }
 
-    // the line segments
     public LineSegment[] segments()
     {
-        return segments;
+        return segments.toArray(new LineSegment[segments.size()]);
     }
 
     public static void main(String[] args)
