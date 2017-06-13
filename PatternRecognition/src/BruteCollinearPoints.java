@@ -23,6 +23,12 @@ public class BruteCollinearPoints
         {
             throw new NullPointerException("argument is null");
         }
+
+        for (int i = 0; i < points.length; i++)
+        {
+            if (points[i] == null) throw new java.lang.NullPointerException("point" + i + " is null");
+        }
+
         segments = new ArrayList<>();
         if (points.length < 4)
         {

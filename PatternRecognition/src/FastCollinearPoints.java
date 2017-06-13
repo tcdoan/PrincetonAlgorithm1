@@ -23,9 +23,9 @@ public class FastCollinearPoints
             throw new NullPointerException("argument is null");
         }
 
-        for (Point p: points)
+        for (int i = 0; i < points.length; i++)
         {
-            if (p == null) throw new java.lang.NullPointerException("a point is null");
+            if (points[i] == null) throw new java.lang.NullPointerException("point" + i + " is null");
         }
 
         Point[] aux = new Point[points.length];
@@ -77,7 +77,7 @@ public class FastCollinearPoints
                         LineSegment segment = new LineSegment(p, aux[k-1]);
                         segments.add(segment);
                     }
-                    j = k;
+                    j = k-1;
                 }
             }
         }
