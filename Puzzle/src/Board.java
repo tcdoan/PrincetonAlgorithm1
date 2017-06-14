@@ -11,6 +11,9 @@ public class Board
     private int tiles[][];
     private int goal[][];
 
+    // tiles[y0][x0] = 0. I.e 0 is located at row y0 and column x0.
+    private int y0;
+    private int x0;
 
     // construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
@@ -20,6 +23,7 @@ public class Board
         {
             throw new NullPointerException("blocks is null.");
         }
+
         n = blocks.length;
         tiles = new int[n][n];
         for (int i = 0; i < n; i++)
@@ -27,6 +31,11 @@ public class Board
             for (int j = 0; j < n; j++)
             {
                 tiles[i][j] = blocks[i][j];
+                if (tiles[i][j] == 0)
+                {
+                    y0 = i;
+                    x0 = j;
+                }
             }
         }
 
@@ -78,10 +87,11 @@ public class Board
             {
                 if (tiles[y][x] != 0)
                 {
-                    // (y0, x0) s.t. goal[y0][x0] = tiles[y][x]
-                    int y0 = (tiles[y][x] -1) / n;
-                    int x0 = (tiles[y][x] -1) % n;
-                    dist = dist + Math.abs(y0 - y) + Math.abs(x0 - x);
+                    // (yg, xg) is the (y,x) coordinate that
+                    // tiles[y][x] is located in the goal board.
+                    int yg = (tiles[y][x] -1) / n;
+                    int xg = (tiles[y][x] -1) % n;
+                    dist = dist + Math.abs(yg - y) + Math.abs(xg - x);
                 }
             }
         }
@@ -181,8 +191,43 @@ public class Board
     public Iterable<Board> neighbors()
     {
         ResizingArrayQueue<Board> queue = new ResizingArrayQueue<>();
-        //TBD
+        if (y0 > 0)
+        {
+            Board north = swapAndGetBoardAt(y0, x0, y0-1, x0);
+            queue.enqueue(north);
+        }
+        if (y0 < n-1)
+        {
+            Board south = swapAndGetBoardAt(y0, x0, y0+1, x0);
+            queue.enqueue(south);
+        }
+        if (x0 > 0)
+        {
+            Board east = swapAndGetBoardAt(y0, x0, y0, x0-1);
+            queue.enqueue(east);
+        }
+        if (x0 < n-1)
+        {
+            Board west = swapAndGetBoardAt(y0, x0, y0, x0+1);
+            queue.enqueue(west);
+        }
         return queue;
+    }
+
+    private Board swapAndGetBoardAt(int y1, int x1, int y2, int x2)
+    {
+        int[][] copy  = new int[n][n];
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                copy[i][j] = tiles[i][j];
+            }
+        }
+        int tmp = copy[y1][x1];
+        copy[y1][x1] = copy[y2][x2];
+        copy[y2][x2] = tmp;
+        return new Board(copy);
     }
 
     // string representation of this board (in the output format specified below)
@@ -225,5 +270,20 @@ public class Board
 
         Board twin = b.twin();
         System.out.println("b.twin() "  + twin.toString());
+
+
+        // create search node
+        System.out.println("create search node... " );
+        blocks[1][1] = 2;
+        blocks[1][2] = 0;
+        Board s = new Board(blocks);
+        System.out.println("search node "  + s.toString());
+
+        System.out.println("search neighbors... " );
+        for (Board n : s.neighbors())
+        {
+            System.out.println(n.toString());
+        }
+
     }
 }
