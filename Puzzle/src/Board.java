@@ -21,6 +21,7 @@ public class Board
             throw new NullPointerException("blocks is null.");
         }
         n = blocks.length;
+        tiles = new int[n][n];
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < n; j++)
@@ -29,6 +30,7 @@ public class Board
             }
         }
 
+        goal = new int[n][n];
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < n; j++)
@@ -57,7 +59,7 @@ public class Board
         {
             for (int j = 0; j < n; j++)
             {
-                if (tiles[i][j] != goal[i][j])
+                if (tiles[i][j] != 0 && tiles[i][j] != goal[i][j])
                 {
                     dist+=1;
                 }
@@ -74,10 +76,13 @@ public class Board
         {
             for (int x = 0; x < n; x++)
             {
-                // (y0, x0) s.t. goal[y0][x0] = tiles[y][x]
-                int y0= tiles[y][x]/n;
-                int x0= tiles[y][x] % n;
-                dist = dist + (Math.abs(y0 - y) + Math.abs(x0 - x));
+                if (tiles[y][x] != 0)
+                {
+                    // (y0, x0) s.t. goal[y0][x0] = tiles[y][x]
+                    int y0 = (tiles[y][x] -1) / n;
+                    int x0 = (tiles[y][x] -1) % n;
+                    dist = dist + Math.abs(y0 - y) + Math.abs(x0 - x);
+                }
             }
         }
         return  dist;
@@ -129,7 +134,7 @@ public class Board
         }
     }
 
-    private Board twinAt(int y1, int x1, int x2, int y2)
+    private Board twinAt(int y1, int x1, int y2, int x2)
     {
         int[][] copy  = new int[n][n];
         for (int i = 0; i < n; i++)
@@ -196,6 +201,29 @@ public class Board
     // unit tests (not graded)
     public static void main(String[] args)
     {
+        int[][] blocks = new int[3][3];
+        blocks[0][0] = 8;
+        blocks[0][1] = 1;
+        blocks[0][2] = 3;
 
+        blocks[1][0] = 4;
+        blocks[1][1] = 0;
+        blocks[1][2] = 2;
+
+        blocks[2][0] = 7;
+        blocks[2][1] = 6;
+        blocks[2][2] = 5;
+
+        Board b = new Board(blocks);
+        System.out.println("Board "  + b.toString());
+        System.out.printf("hamming = %d, manhattan = %d \n" , b.hamming(), b.manhattan());
+        assert (b.hamming() == 5);
+        assert (b.manhattan() == 10);
+
+        Board b2 = new Board(blocks);
+        System.out.printf("b2.isGoal() = %s, b2 eq b is %s \n" , Boolean.toString(b2.isGoal()), Boolean.toString(b2.equals(b)));
+
+        Board twin = b.twin();
+        System.out.println("b.twin() "  + twin.toString());
     }
 }
