@@ -22,35 +22,41 @@ public class Solver
         while (masterQueue.size() > 0 && twinQueue.size() > 0)
         {
             SearchNode twinNode = twinQueue.delMin();
-            twinSolution.enqueue(twinNode.board);
-            if (twinNode.board.isGoal())
+            if (twinNode != null && twinNode.board != null)
             {
-                isSolvable = false;
-                break;
-            }
-            else
-            {
-                SearchNode current = masterQueue.delMin();
-                solution.enqueue(current.board);
-                if (current.board.isGoal())
+                twinSolution.enqueue(twinNode.board);
+                if (twinNode.board.isGoal())
                 {
-                    isSolvable = true;
+                    isSolvable = false;
                     break;
                 }
-
-                for (Board twinNeighbor : twinNode.board.neighbors())
+                else
                 {
-                    if (!twinNeighbor.equals(twinNode.board))
+                    SearchNode current = masterQueue.delMin();
+                    if (current != null && current.board != null)
                     {
-                        twinQueue.insert(new SearchNode(twinNeighbor, solution.size(), twinNode));
-                    }
-                }
+                        solution.enqueue(current.board);
+                        if (current.board.isGoal())
+                        {
+                            isSolvable = true;
+                            break;
+                        }
 
-                for (Board n : current.board.neighbors())
-                {
-                    if (!n.equals(current.board))
-                    {
-                        masterQueue.insert(new SearchNode(n, twinSolution.size(), twinNode));
+                        for (Board twinNeighbor : twinNode.board.neighbors())
+                        {
+                            if (twinNeighbor != null && twinNode.prev != null && !twinNeighbor.equals(twinNode.prev.board))
+                            {
+                                twinQueue.insert(new SearchNode(twinNeighbor, twinSolution.size(), twinNode));
+                            }
+                        }
+
+                        for (Board n : current.board.neighbors())
+                        {
+                            if (n != null && current.prev != null && !n.equals(current.prev.board))
+                            {
+                                masterQueue.insert(new SearchNode(n, solution.size(), current));
+                            }
+                        }
                     }
                 }
             }

@@ -1,4 +1,3 @@
-import edu.princeton.cs.algs4.RandomSeq;
 import edu.princeton.cs.algs4.ResizingArrayQueue;
 import edu.princeton.cs.algs4.StdRandom;
 
@@ -165,7 +164,7 @@ public class Board
     {
         if (y == null)
         {
-            throw new NullPointerException();
+            return false;
         }
 
         if (!(y instanceof Board))
