@@ -12,7 +12,7 @@ public class PointSET
     private RedBlackBST<Point2D, Point2D> points;
 
     // construct an empty set of points
-    PointSET()
+    public PointSET()
     {
         points = new RedBlackBST<>();
     }
@@ -99,12 +99,6 @@ public class PointSET
             }
         }
         return minDistancePoint;
-    }
-
-    // unit testing of the methods (optional)
-    public static void main(String[] args)
-    {
-
     }
 
 }
