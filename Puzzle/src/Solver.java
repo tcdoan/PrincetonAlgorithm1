@@ -1,61 +1,57 @@
-import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.MinPQ;
-import edu.princeton.cs.algs4.ResizingArrayQueue;
-import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.*;
 
 public class Solver
 {
+    private boolean isSolvable;
+    private Move solution;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial)
     {
-        MinPQ<SearchNode> masterQueue = new MinPQ<>();
-        MinPQ<SearchNode> twinQueue = new MinPQ<>();
+        if (initial == null)
+        {
+            throw new IllegalArgumentException("Initial board is null");
+        }
 
-        SearchNode firstSearchNode = new SearchNode(initial,0,null);
-        SearchNode firstTwinNode = new SearchNode(initial.twin(),0,null);
+        MinPQ<Move> masterQueue = new MinPQ<>();
+        MinPQ<Move> twinQueue = new MinPQ<>();
 
-        masterQueue.insert(firstSearchNode);
-        twinQueue.insert(firstTwinNode);
+        masterQueue.insert(new Move(initial,0,null));
+        twinQueue.insert(new Move(initial.twin(),0,null));
 
         isSolvable = false;
         while (masterQueue.size() > 0 && twinQueue.size() > 0)
         {
-            SearchNode twinNode = twinQueue.delMin();
-            if (twinNode != null && twinNode.board != null)
+            Move twinMove = twinQueue.delMin();
+            if (twinMove.board != null)
             {
-                twinSolution.enqueue(twinNode.board);
-                if (twinNode.board.isGoal())
+                if (twinMove.board.isGoal())
                 {
                     isSolvable = false;
                     break;
                 }
-                else
+                solution = masterQueue.delMin();
+                if (solution != null && solution.board != null)
                 {
-                    SearchNode current = masterQueue.delMin();
-                    if (current != null && current.board != null)
+                    if (solution.board.isGoal())
                     {
-                        solution.enqueue(current.board);
-                        if (current.board.isGoal())
-                        {
-                            isSolvable = true;
-                            break;
-                        }
+                        isSolvable = true;
+                        break;
+                    }
 
-                        for (Board twinNeighbor : twinNode.board.neighbors())
+                    for (Board twinNeighbor : twinMove.board.neighbors())
+                    {
+                        if (twinNeighbor != null && (twinMove.prev == null  || !twinNeighbor.equals(twinMove.prev.board)))
                         {
-                            if (twinNeighbor != null && twinNode.prev != null && !twinNeighbor.equals(twinNode.prev.board))
-                            {
-                                twinQueue.insert(new SearchNode(twinNeighbor, twinSolution.size(), twinNode));
-                            }
+                            twinQueue.insert(new Move(twinNeighbor, twinMove.numMovesToReach+1, twinMove));
                         }
+                    }
 
-                        for (Board n : current.board.neighbors())
+                    for (Board n : solution.board.neighbors())
+                    {
+                        if (n != null && (solution.prev == null || !n.equals(solution.prev.board)))
                         {
-                            if (n != null && current.prev != null && !n.equals(current.prev.board))
-                            {
-                                masterQueue.insert(new SearchNode(n, solution.size(), current));
-                            }
+                            masterQueue.insert(new Move(n, solution.numMovesToReach+1, solution));
                         }
                     }
                 }
@@ -74,7 +70,7 @@ public class Solver
     {
         if (isSolvable)
         {
-            return solution.size()-1;
+            return solution.numMovesToReach;
         }
         return -1;
     }
@@ -84,22 +80,25 @@ public class Solver
     {
         if (isSolvable())
         {
-            return solution;
+            ResizingArrayStack<Board> ss = new ResizingArrayStack<>();
+            Move x = solution;
+            while (x != null)
+            {
+                ss.push(x.board);
+                x = x.prev;
+            }
+            return ss;
         }
         return null;
     }
 
-    private boolean isSolvable;
-    private ResizingArrayQueue<Board> solution = new ResizingArrayQueue<>();
-    private ResizingArrayQueue<Board> twinSolution = new ResizingArrayQueue<>();
-
-    private class SearchNode implements Comparable<SearchNode>
+    private class Move implements Comparable<Move>
     {
         private Board board;
         private int numMovesToReach;
-        private SearchNode prev;
+        private Move prev;
 
-        public SearchNode(Board board, int numMovesToReach, SearchNode prev)
+        public Move(Board board, int numMovesToReach, Move prev)
         {
             this.board = board;
             this.numMovesToReach = numMovesToReach;
@@ -112,8 +111,12 @@ public class Solver
         }
 
         @Override
-        public int compareTo(SearchNode other)
+        public int compareTo(Move other)
         {
+            if (priority() == other.priority())
+            {
+                return this.board.manhattan() - other.board.manhattan();
+            }
             return priority() - other.priority();
         }
     }
@@ -126,8 +129,12 @@ public class Solver
         int n = in.readInt();
         int[][] blocks = new int[n][n];
         for (int i = 0; i < n; i++)
+        {
             for (int j = 0; j < n; j++)
+            {
                 blocks[i][j] = in.readInt();
+            }
+        }
         Board initial = new Board(blocks);
 
         // solve the puzzle
@@ -142,7 +149,9 @@ public class Solver
         {
             StdOut.println("Minimum number of moves = " + solver.moves());
             for (Board board : solver.solution())
+            {
                 StdOut.println(board);
+            }
         }
     }
 }

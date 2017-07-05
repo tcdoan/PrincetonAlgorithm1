@@ -7,12 +7,8 @@ import edu.princeton.cs.algs4.StdRandom;
 public class Board
 {
     private int n;
-    private int tiles[][];
-    private int goal[][];
-
-    // tiles[y0][x0] = 0. I.e 0 is located at row y0 and column x0.
-    private int y0;
-    private int x0;
+    private int tiles[];
+    private int i0;
 
     // construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
@@ -24,30 +20,15 @@ public class Board
         }
 
         n = blocks.length;
-        tiles = new int[n][n];
+        tiles = new int[n*n];
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < n; j++)
             {
-                tiles[i][j] = blocks[i][j];
-                if (tiles[i][j] == 0)
+                tiles[i*n + j] = blocks[i][j];
+                if (tiles[i*n + j] == 0)
                 {
-                    y0 = i;
-                    x0 = j;
-                }
-            }
-        }
-
-        goal = new int[n][n];
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                if (i == n-1 && j == n-1)
-                {
-                    goal[i][j] = 0;
-                } else {
-                    goal[i][j] = i*n + j + 1;
+                    i0 = i*n + j;
                 }
             }
         }
@@ -63,14 +44,11 @@ public class Board
     public int hamming()
     {
         int dist = 0;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < n*n; i++)
         {
-            for (int j = 0; j < n; j++)
+            if (tiles[i] != 0 && tiles[i] != i+1)
             {
-                if (tiles[i][j] != 0 && tiles[i][j] != goal[i][j])
-                {
-                    dist+=1;
-                }
+                dist+=1;
             }
         }
         return  dist;
@@ -84,13 +62,12 @@ public class Board
         {
             for (int x = 0; x < n; x++)
             {
-                if (tiles[y][x] != 0)
+                if (tiles[y*n + x] != 0)
                 {
-                    // (yg, xg) is the (y,x) coordinate that
-                    // tiles[y][x] is located in the goal board.
-                    int yg = (tiles[y][x] -1) / n;
-                    int xg = (tiles[y][x] -1) % n;
-                    dist = dist + Math.abs(yg - y) + Math.abs(xg - x);
+                    // expected y, expected x
+                    int ey = (tiles[y*n + x] -1) / n;
+                    int ex = (tiles[y*n + x] -1) % n;
+                    dist = dist + Math.abs(ey - y) + Math.abs(ex - x);
                 }
             }
         }
@@ -100,42 +77,33 @@ public class Board
     // is this board the goal board?
     public boolean isGoal()
     {
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                if (tiles[i][j] != goal[i][j])
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return hamming() == 0;
     }
 
     // a board that is obtained by exchanging any pair of blocks
     public Board twin()
     {
+        int i = 0;
         while (true)
         {
             int x = StdRandom.uniform(n);
             int y = StdRandom.uniform(n);
 
-            if (tiles[y][x] != 0)
+            if (tiles[y*n+x] != 0)
             {
-                if (y > 0 && tiles[y-1][x] != 0)
+                if (y > 0 && tiles[n*(y-1)+x] != 0)
                 {
                     return twinAt(y, x, y-1, x);
                 }
-                if (y < n-1 && tiles[y+1][x] != 0)
+                if (y < n-1 && tiles[n*(y+1)+x] != 0)
                 {
                     return twinAt(y, x, y+1, x);
                 }
-                if (x > 0 && tiles[y][x-1] != 0)
+                if (x > 0 && tiles[n*y +x-1] != 0)
                 {
                     return twinAt(y, x, y, x-1);
                 }
-                if (x < n-1 && tiles[y][x+1] != 0)
+                if (x < n-1 && tiles[n*y + x+1] != 0)
                 {
                     return twinAt(y, x, y, x+1);
                 }
@@ -150,7 +118,7 @@ public class Board
         {
             for (int j = 0; j < n; j++)
             {
-                copy[i][j] = tiles[i][j];
+                copy[i][j] = tiles[i*n + j];
             }
         }
         int tmp = copy[y1][x1];
@@ -173,14 +141,16 @@ public class Board
         }
 
         Board b = (Board) y;
+        if (b.tiles.length != this.tiles.length)
+        {
+            return false;
+        }
+
         for (int i = 0; i < b.tiles.length; i++)
         {
-            for (int j = 0; j < b.tiles.length; j++)
+            if (tiles[i] != b.tiles[i])
             {
-                if (tiles[i][j] != b.tiles[i][j])
-                {
-                    return false;
-                }
+                return false;
             }
         }
         return true;
@@ -190,6 +160,9 @@ public class Board
     public Iterable<Board> neighbors()
     {
         ResizingArrayQueue<Board> queue = new ResizingArrayQueue<>();
+        int y0 = i0 / n;
+        int x0 = i0 % n;
+
         if (y0 > 0)
         {
             Board north = swapAndGetBoardAt(y0, x0, y0-1, x0);
@@ -220,7 +193,7 @@ public class Board
         {
             for (int j = 0; j < n; j++)
             {
-                copy[i][j] = tiles[i][j];
+                copy[i][j] = tiles[i*n+j];
             }
         }
         int tmp = copy[y1][x1];
@@ -236,7 +209,7 @@ public class Board
         s.append(n + "\n");
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                s.append(String.format("%2d ", tiles[i][j]));
+                s.append(String.format("%2d ", tiles[i*n+j]));
             }
             s.append("\n");
         }
