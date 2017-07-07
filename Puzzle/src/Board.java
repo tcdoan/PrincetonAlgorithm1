@@ -16,7 +16,7 @@ public class Board
     {
         if (blocks == null)
         {
-            throw new NullPointerException("blocks is null.");
+            throw new IllegalArgumentException("Inout blocks is null");
         }
 
         n = blocks.length;
