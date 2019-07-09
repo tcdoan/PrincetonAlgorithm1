@@ -22,7 +22,7 @@ public:
         //     // path compression 
         //     id[p] = id[id[p]];
         //     p = id[p];
-        // }        
+        // }
         return id[p] = id[p] == p ? p : root(id[p]);
     }
 
@@ -38,15 +38,15 @@ public:
         if(rp == rq) { return; }
         count--;
         id[rq] = rp;
-        // Weighted union find...
+        // Weighted union find.
         // if (sz[rp] < sz[rq]) 
         // {
         //     id[rp] = rq;
-        //     sz[rq] += sz[rp]; 
+        //     sz[rq] += sz[rp];
         //     return;
         // }
         // id[rq] = rp;
-        // sz[rp] += sz[rq];                
+        // sz[rp] += sz[rq];
     }
 
     int Count() 
@@ -57,7 +57,7 @@ public:
 private:
     // number of nodes.
     int n;
-    
+
     // number of components
     int count;
 
