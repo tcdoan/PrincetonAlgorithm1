@@ -5,28 +5,31 @@
 #include <ctime>
 
 // Compile cl.exe /GS- /O2 main.cpp
-// Run main.exe yields 2.8 seconds on uf.txt input
+// Run main.exe yields 108 ms on uf.txt input. 2.8 seconds including reading 4M numbers from the file.
 int main(char** args)
 {
+    vector<uint32_t> data(4000000);
     ifstream ifs("uf.txt", ifstream::in);
     int N;
     ifs >> N;
 
-    clock_t begin = clock();	
     UnionFind uf(N);
+    int i = 0;
     while (!ifs.eof())
     {
-        uint32_t x;
-        uint32_t y;
-        ifs >> x;
-        ifs >> y;
-        if (uf.Connected(x, y)) 
+        ifs >> data[i++];
+        ifs >> data[i++];
+    }
+
+    clock_t begin = clock();
+    for (int i = 0; i < data.size(); i+=2)
+    {
+        if (uf.Connected(data[i], data[i+1]))
         {
             continue;
         }
-        uf.Union(x,y);
+        uf.Union(data[i], data[i+1]);
     }
-
     std::cout << uf.Count() << " components" << endl;
     clock_t endt = clock();
     std::cout << ( endt -begin ) * 1000.0 / CLOCKS_PER_SEC << " ms." << std::endl;
