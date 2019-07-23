@@ -1,0 +1,8 @@
+A party having n people. 
+assuming each drink must have k people
+what is the minumum number of drinks to have such that each person drinks with everyone else.
+
+5,3: A,B,C,D,E
+
+ABC, ABD, ABE, 
+

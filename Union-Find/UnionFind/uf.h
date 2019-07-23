@@ -15,7 +15,7 @@ public:
         }
     }
 
-    int root(int p) 
+    int Root(int p) 
     {
         // while(p != id[p])
         // {
@@ -23,21 +23,32 @@ public:
         //     id[p] = id[id[p]];
         //     p = id[p];
         // }
-        return id[p] = id[p] == p ? p : root(id[p]);
+        return id[p] = id[p] == p ? p : Root(id[p]);
     }
 
     bool Connected(int p, int q) 
     {
-        return root(p) == root(q);
+        return Root(p) == Root(q);
     }
 
     void Union(int p, int q) 
     {
-        int rp = root(p);
-        int rq = root(q);
+        int rp = Root(p);
+        int rq = Root(q);
         if(rp == rq) { return; }
         count--;
-        id[rq] = rp;
+
+        // This make sure 
+        // Root(i) returns the largest element 
+        // in the connected component containing i
+        if (rp > rq) 
+        {
+            id[rq] = rp;
+        }
+        else 
+        {
+            id[rp] = rq;
+        }
         // Weighted union find.
         // if (sz[rp] < sz[rq]) 
         // {
