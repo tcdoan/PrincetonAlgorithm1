@@ -16,9 +16,11 @@
 
 # Package Files #
 **/*.jar
+!**/JTetris.jar
 **/*.war
 *.ear
 **/*.zip
+!**/TetrisStarter.zip
 **/*.tar.gz
 **/*.rar
 **/*.exe
