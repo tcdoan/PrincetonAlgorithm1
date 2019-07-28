@@ -4,8 +4,27 @@ import java.util.*;
 /**
  An immutable representation of a tetris piece in a particular rotation.
  Each piece is defined by the blocks that make up its body.
- See the Tetris-Architecture.html for an overview.
- 
+
+ The body is represented by the (x, y) coordinates of its blocks, 
+ with the origin in the lower-left corner.
+
+ So the body of this piece is defined by the (x,y) points: (0,0), (1,0), (1, 1), (2,1)
+
+ Each piece responds to the messages like getWidth(), getHeight(), and getBody() 
+ that allow the client to see the state of the piece.
+
+ The getSkirt() message returns an array that shows the lowest y value for each x value across the piece 
+ ({0, 0, 1} for the piece above).
+
+ The skirt makes it easier to compute how a piece will come to land in the board. 
+
+ To allow the client to see the various piece rotations that are available, the Piece class builds 
+ an array of the standard tetris pieces internally -- available through the Piece.getPieces().
+ This array contains the first rotation of each of the standard pieces.
+
+ Starting with any piece, the nextRotation() message returns the "next" piece object that represents 
+ the next counter-clockwise rotation. Enough calls to nextRotation() gets back to the original piece.
+
  This is the starter file version -- a few simple things are filled in already
  
  @author	Nick Parlante
@@ -37,39 +56,56 @@ public final class Piece {
 	 This constructor is PRIVATE -- if a client
 	 wants a piece object, they must use Piece.getPieces().
 	*/
-	private Piece(Point[] points) {
+	private Piece(Point[] points, int type) {
+		System.arraycopy(points, 0, this.body, 0, points.length);
+		int w = 0;
+		int h = 0;
+		for (Point p : points)
+		{
+			w = p.x > w ? p.x : w;
+			h = p.y > h ? p.y : h;
+		}
+		this.width = w+1;
+		this.height = h + 1;
+
+		this.skirt = new int[this.width];
+		Arrays.fill(this.skirt, this.height);
+		for (Point p : points)
+		{
+			this.skirt[p.x] = p.y < this.skirt[p.x] ? p.y : this.skirt[p.x];
+		}		
 	}	
 
-    /**
-     Returns the width of the piece measured in blocks.
-    */
+	/**
+	 Returns the width of the piece measured in blocks.
+	*/
 	public int getWidth() {
-		return(width);
+		return this.width;
 	}
 	
-    /**
-     Returns the height of the piece measured in blocks.
-    */
+	/**
+	 Returns the height of the piece measured in blocks.
+	*/
 	public int getHeight() {
-		return(height);
+		return this.height;
 	}
 
-    /**
-     Returns a pointer to the piece's body. The caller
-     should not modify this array.
-    */
+	/**
+	 Returns a pointer to the piece's body. The caller
+	 should not modify this array.
+	*/
 	public Point[] getBody() {
-		return(body);
+		return this.body;
 	}
 	
-    /**
-     Returns a pointer to the piece's skirt. For each x value
-     across the piece, the skirt gives the lowest y value in the body.
-     This useful for computing where the piece will land.
-     The caller should not modify this array.
-    */
+	/**
+	 Returns a pointer to the piece's skirt. For each x value
+	 across the piece, the skirt gives the lowest y value in the body.
+	 This useful for computing where the piece will land.
+	 The caller should not modify this array.
+	*/
 	public int[] getSkirt() {
-		return(skirt);
+		return this.skirt;
 	}
 
 
@@ -96,10 +132,44 @@ public final class Piece {
 	 if two rotations are effectively the same.
 	*/
 	public boolean equals(Piece other) {
+		if (other == this)
+		{
+			return true;
+		}
+
+		for (Piece x = this.next; x != this; x = x.next)
+		{
+			if (x == other)
+			{
+				return true;
+			} else {
+				if (isEqual(x, other))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
+	private static bool isEqual(Point[] p1, Point[] p2)
+	{
+		if (p1 == null || p2 == null || p1.length != p2.length)
+		{
+			return false;
+		}
 
+		for (int i = 0; i < x.length; i++ )
+		{
+			if (p1[i].x != p2[i].x || p1[i].y != p2[i].y)
+			{
+				return false;
+			}
+		}
 
+		return true;
+	}
 	
 	/**
 	 Returns an array containing the first rotation of
@@ -133,8 +203,74 @@ public final class Piece {
 			pieceRow(new Piece(parsePoints("0 0	1 0	1 1	2 0"))),	// 6
 		};
 	*/
+
+		if (null != pieces || pieces.length == 0)
+		{
+			pieces = new Piece[] {
+				pieceRow(new Piece(parsePoints("0 0	0 1	0 2	0 3"))),	// 0
+				pieceRow(new Piece(parsePoints("0 0	0 1	0 2	1 0"))),	// 1
+				pieceRow(new Piece(parsePoints("0 0	1 0	1 1	1 2"))),	// 2
+				pieceRow(new Piece(parsePoints("0 0	1 0	1 1	2 1"))),	// 3
+				pieceRow(new Piece(parsePoints("0 1	1 1	1 0	2 0"))),	// 4
+				pieceRow(new Piece(parsePoints("0 0	0 1	1 0	1 1"))),	// 5
+				pieceRow(new Piece(parsePoints("0 0	1 0	1 1	2 0"))),	// 6
+			};
+		}
+
+		return pieces;
 	}
 
+	private static Piece pieceRow(Piece x) {
+		if (isEqual(x.getBody(), parsePoints("0 0 0 1	0 2	0 3"))) {
+			Pice pnext =  new Piece(parsePoints("0 0 1 0 2 0 3 0"));
+			x.next = pnext;
+			pnext.next = x;
+
+		} else if (isEqual(x.getBody(), parsePoints("0 0 0 1	0 2	1 0"))) {
+			Pice pnext1 =  new Piece(parsePoints("0 0 1 0 2 0 2 1"));
+			x.next = pnext1;
+			Pice pnext2 =  new Piece(parsePoints("0 2 1 0 1 1 1 2"));
+			pnext1.next = pnext2;
+			Pice pnext3 =  new Piece(parsePoints("0 0 0 1 1 1 2 1"));
+			pnext2.next = pnext3;
+			pnext3.next = x;
+
+		} else if (isEqual(x.getBody(), parsePoints("0 0 1 0	1 1	1 2"))) {
+			Pice pnext1 =  new Piece(parsePoints("0 1 1 1 2 1 2 1"));
+			x.next = pnext1;
+			Pice pnext2 =  new Piece(parsePoints("0 0 0 1 0 2 2 1"));
+			pnext1.next = pnext2;
+			Pice pnext3 =  new Piece(parsePoints("0 0 0 1 1 0 2 0"));
+			pnext2.next = pnext3;
+			pnext3.next = x;
+
+		} else if (isEqual(x.getBody(), parsePoints("0 0 1 0	1 1	2 1"))) {
+			Pice pnext =  new Piece(parsePoints("0 1 0 2 1 0 1 1"));
+			x.next = pnext;
+			pnext.next = x;
+
+		} else if (isEqual(x.getBody(), parsePoints("0 1 1 1	1 0	2 0"))) {
+			Pice pnext =  new Piece(parsePoints("0 0 0 1 1 1 1 2"));
+			x.next = pnext;
+			pnext.next = x;
+
+		} else if (isEqual(x.getBody(), parsePoints("0 0 0 1	1 0	1 1"))) {
+			x.next = x;
+		} else if (isEqual(x.getBody(), parsePoints("0 0 1 0	1 1	2 0"))) {
+			Pice pnext1 =  new Piece(parsePoints("0 1 1 0 1 1 1 2"));
+			x.next = pnext1;
+			Pice pnext2 =  new Piece(parsePoints("0 1 1 0 1 1 2 1 "));
+			pnext1.next = pnext2;
+			Pice pnext3 =  new Piece(parsePoints("0 0 0 1 0 2 1 1"));
+			pnext2.next = pnext3;
+			pnext3.next = x;
+
+		} else {
+			throw new RuntimeException("Unpexpected given piece.");
+		}
+
+		return x;
+	}
 
 	/**
 	 Given a string of x,y pairs ("0 0	0 1	0 2	1 0"), parses
@@ -142,7 +278,7 @@ public final class Piece {
 	 (Provided code)
 	*/
 	private static Point[] parsePoints(String string) {
-	    // could use Arraylist here, but use vector so works on Java 1.1
+		// could use Arraylist here, but use vector so works on Java 1.1
 		Vector points = new Vector();
 		StringTokenizer tok = new StringTokenizer(string);
 		try {
