@@ -6,7 +6,6 @@ import javax.swing.event.*;
 
 
 /**
- Debugging client for the Piece class.
  The JPieceTest component draws all the rotations of a tetris piece.
  JPieceTest.main()  creates a frame  with one JPieceTest for each
  of the 7 standard tetris pieces.
@@ -17,13 +16,10 @@ import javax.swing.event.*;
 */
 class JPieceTest extends JComponent {
 	protected Piece root;	
-	
 
 	public JPieceTest(Piece piece, int width, int height) {
-		super();
-		
+		super();		
 		setPreferredSize(new Dimension(width, height));
-
 		root = piece;
 	}
 
@@ -33,12 +29,44 @@ class JPieceTest extends JComponent {
 	*/
 	public final int MAX_ROTATIONS = 4;
 	public void paintComponent(Graphics g) {
+		int w = this.getWidth() / 4;
+		int h = this.getHeight();
+		Rectangle r = new Rectangle(0, 0, w, h);
+		drawPiece(g, root, r);
+
+		int i = 0;
+		for (Piece x = root.nextRotation(); x != root; x = x.nextRotation())
+		{
+			r = new Rectangle(++i*w, 0, w, h);
+			drawPiece(g, x, r);
+		}
 	}
 	
 	/**
 	 Draw the piece inside the given rectangle.
 	*/
-	private void drawPiece(Graphics g, Piece piece, Rectangle r) {
+	private void drawPiece(Graphics g, Piece piece, Rectangle r) {		
+
+		int w = r.height/4 < r.width/4 ? r.height/4 : r.width/4;
+		Point dxy[][] = new Point[MAX_ROTATIONS][MAX_ROTATIONS];
+		for (int x = 0; x < MAX_ROTATIONS; x++)
+		{
+			for (int y = 0; y < MAX_ROTATIONS; y++)
+			{
+				Point p = new Point(r.x + x * w, r.y + y * w);
+				dxy[x][y] = p;
+			}
+		}
+
+		for (Point p : piece.getBody())
+		{
+			int x = p.x;
+			int y = 3 - p.y;
+			Point dp = dxy[x][y];
+			g.setColor(Color.BLACK);
+			// g.fillRect(dp.x, dp.y, w, w);
+			g.drawRect(dp.x, dp.y, w, w);
+		}
 	}	
 
 
@@ -50,13 +78,10 @@ class JPieceTest extends JComponent {
 	
 	{
 		JFrame frame = new JFrame("Piece Tester");
-		JComponent container = (JComponent)frame.getContentPane();
-		
-		// Put in a BoxLayout to make a vertical list
+		JComponent container = (JComponent)frame.getContentPane();		
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		
 		Piece[] pieces = Piece.getPieces();
-		
 		for (int i=0; i<pieces.length; i++) {
 			JPieceTest test = new JPieceTest(pieces[i], 375, 75);
 			container.add(test);

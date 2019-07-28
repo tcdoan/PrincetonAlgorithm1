@@ -56,7 +56,8 @@ public final class Piece {
 	 This constructor is PRIVATE -- if a client
 	 wants a piece object, they must use Piece.getPieces().
 	*/
-	private Piece(Point[] points, int type) {
+	private Piece(Point[] points) {
+		this.body = new Point[points.length];
 		System.arraycopy(points, 0, this.body, 0, points.length);
 		int w = 0;
 		int h = 0;
@@ -143,7 +144,7 @@ public final class Piece {
 			{
 				return true;
 			} else {
-				if (isEqual(x, other))
+				if (isEqual(x.getBody(), other.getBody()))
 				{
 					return true;
 				}
@@ -153,14 +154,14 @@ public final class Piece {
 		return false;
 	}
 
-	private static bool isEqual(Point[] p1, Point[] p2)
+	private static boolean isEqual(Point[] p1, Point[] p2)
 	{
 		if (p1 == null || p2 == null || p1.length != p2.length)
 		{
 			return false;
 		}
 
-		for (int i = 0; i < x.length; i++ )
+		for (int i = 0; i < p1.length; i++ )
 		{
 			if (p1[i].x != p2[i].x || p1[i].y != p2[i].y)
 			{
@@ -204,7 +205,7 @@ public final class Piece {
 		};
 	*/
 
-		if (null != pieces || pieces.length == 0)
+		if (null == pieces || pieces.length == 0)
 		{
 			pieces = new Piece[] {
 				pieceRow(new Piece(parsePoints("0 0	0 1	0 2	0 3"))),	// 0
@@ -222,46 +223,46 @@ public final class Piece {
 
 	private static Piece pieceRow(Piece x) {
 		if (isEqual(x.getBody(), parsePoints("0 0 0 1	0 2	0 3"))) {
-			Pice pnext =  new Piece(parsePoints("0 0 1 0 2 0 3 0"));
+			Piece pnext =  new Piece(parsePoints("0 0 1 0 2 0 3 0"));
 			x.next = pnext;
 			pnext.next = x;
 
 		} else if (isEqual(x.getBody(), parsePoints("0 0 0 1	0 2	1 0"))) {
-			Pice pnext1 =  new Piece(parsePoints("0 0 1 0 2 0 2 1"));
+			Piece pnext1 =  new Piece(parsePoints("0 0 1 0 2 0 2 1"));
 			x.next = pnext1;
-			Pice pnext2 =  new Piece(parsePoints("0 2 1 0 1 1 1 2"));
+			Piece pnext2 =  new Piece(parsePoints("0 2 1 0 1 1 1 2"));
 			pnext1.next = pnext2;
-			Pice pnext3 =  new Piece(parsePoints("0 0 0 1 1 1 2 1"));
+			Piece pnext3 =  new Piece(parsePoints("0 0 0 1 1 1 2 1"));
 			pnext2.next = pnext3;
 			pnext3.next = x;
 
 		} else if (isEqual(x.getBody(), parsePoints("0 0 1 0	1 1	1 2"))) {
-			Pice pnext1 =  new Piece(parsePoints("0 1 1 1 2 1 2 1"));
+			Piece pnext1 =  new Piece(parsePoints("0 1 1 1 2 0 2 1"));
 			x.next = pnext1;
-			Pice pnext2 =  new Piece(parsePoints("0 0 0 1 0 2 2 1"));
+			Piece pnext2 =  new Piece(parsePoints("0 0 0 1 0 2 1 2"));
 			pnext1.next = pnext2;
-			Pice pnext3 =  new Piece(parsePoints("0 0 0 1 1 0 2 0"));
+			Piece pnext3 =  new Piece(parsePoints("0 0 0 1 1 0 2 0"));
 			pnext2.next = pnext3;
 			pnext3.next = x;
 
 		} else if (isEqual(x.getBody(), parsePoints("0 0 1 0	1 1	2 1"))) {
-			Pice pnext =  new Piece(parsePoints("0 1 0 2 1 0 1 1"));
+			Piece pnext =  new Piece(parsePoints("0 1 0 2 1 0 1 1"));
 			x.next = pnext;
 			pnext.next = x;
 
 		} else if (isEqual(x.getBody(), parsePoints("0 1 1 1	1 0	2 0"))) {
-			Pice pnext =  new Piece(parsePoints("0 0 0 1 1 1 1 2"));
+			Piece pnext =  new Piece(parsePoints("0 0 0 1 1 1 1 2"));
 			x.next = pnext;
 			pnext.next = x;
 
 		} else if (isEqual(x.getBody(), parsePoints("0 0 0 1	1 0	1 1"))) {
 			x.next = x;
 		} else if (isEqual(x.getBody(), parsePoints("0 0 1 0	1 1	2 0"))) {
-			Pice pnext1 =  new Piece(parsePoints("0 1 1 0 1 1 1 2"));
+			Piece pnext1 =  new Piece(parsePoints("0 1 1 0 1 1 1 2"));
 			x.next = pnext1;
-			Pice pnext2 =  new Piece(parsePoints("0 1 1 0 1 1 2 1 "));
+			Piece pnext2 =  new Piece(parsePoints("0 1 1 0 1 1 2 1 "));
 			pnext1.next = pnext2;
-			Pice pnext3 =  new Piece(parsePoints("0 0 0 1 0 2 1 1"));
+			Piece pnext3 =  new Piece(parsePoints("0 0 0 1 0 2 1 1"));
 			pnext2.next = pnext3;
 			pnext3.next = x;
 
